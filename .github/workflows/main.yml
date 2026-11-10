@@ -1,0 +1,39 @@
+name: Build Khata Notebook APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'KhataNotebook_Mobile_Cloud_Build.zip'
+      - '.github/workflows/main.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android project
+        run: |
+          mkdir project
+          unzip KhataNotebook_Mobile_Cloud_Build.zip -d project
+
+      - name: Build APK
+        working-directory: project
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Khata-Notebook-APK
+          path: project/**/build/outputs/apk/debug/*.apk
