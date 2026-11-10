@@ -1,11 +1,11 @@
+
 name: Build Khata Notebook APK
 
 on:
   workflow_dispatch:
   push:
-    paths:
-      - 'KhataNotebook_Mobile_Cloud_Build.zip'
-      - '.github/workflows/main.yml'
+    branches:
+      - main
 
 jobs:
   build:
@@ -21,23 +21,29 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
       - name: Extract Android project
         run: |
-          mkdir project
-          unzip KhataNotebook_Mobile_Cloud_Build.zip -d project
+          mkdir -p project
+          unzip -q KhataNotebook_Mobile_Cloud_Build_FIXED.zip -d project
 
-          - name: Set up Gradle
-            uses: gradle/actions/setup-gradle@v4
-            with:
-              gradle-version: '8.7'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
-          - name: Build APK
-            working-directory: project
-            run: gradle assembleDebug
+      - name: Build APK
+        working-directory: project/KhataNotebook_Android_Project
+        run: gradle :app:assembleDebug
 
-          - name: Upload APK
-            uses: actions/upload-artifact@v4
-            with:
-              name: Khata-Notebook-APK
-              path: project/**/build/outputs/apk/debug/*.apk
-
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Khata-Notebook-APK
+          path: project/KhataNotebook_Android_Project/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
