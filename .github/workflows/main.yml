@@ -26,14 +26,18 @@ jobs:
           mkdir project
           unzip KhataNotebook_Mobile_Cloud_Build.zip -d project
 
-      - name: Build APK
-        working-directory: project
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          - name: Set up Gradle
+            uses: gradle/actions/setup-gradle@v4
+            with:
+              gradle-version: '8.7'
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Khata-Notebook-APK
-          path: project/**/build/outputs/apk/debug/*.apk
+          - name: Build APK
+            working-directory: project
+            run: gradle assembleDebug
+
+          - name: Upload APK
+            uses: actions/upload-artifact@v4
+            with:
+              name: Khata-Notebook-APK
+              path: project/**/build/outputs/apk/debug/*.apk
+
